@@ -25,12 +25,15 @@ class ChargeOverAPI_Object
 
 	const TYPE_RESTHOOK = '_resthook';
 
-	//protected $_arr;
-	
+	/**
+	 * ChargeOverAPI_Object constructor.
+	 *
+	 * @param array $arr
+	 */
 	public function __construct($arr = array())
 	{
 		//$this->_arr = $arr;
-		
+
 		if (is_array($arr))
 		{
 			foreach ($arr as $key => $value)
@@ -39,16 +42,18 @@ class ChargeOverAPI_Object
 			}
 		}
 	}
-	
+
 	/**
-	 * 
+	 * @param $method
+	 *
+	 * @return string
 	 */
 	public static function transformMethodToField($method)
 	{
 		$strip = array(
-			'set', 
-			'get', 
-			'add', 
+			'set',
+			'get',
+			'add',
 			);
 
 		foreach ($strip as $prefix)
@@ -80,6 +85,12 @@ class ChargeOverAPI_Object
 		return strtolower(trim(implode('_', $parts), '_'));
 	}
 
+	/**
+	 * @param        $field
+	 * @param string $prefix
+	 *
+	 * @return string
+	 */
 	public static function transformFieldToMethod($field, $prefix = 'set')
 	{
 		$last = 0;
@@ -92,7 +103,7 @@ class ChargeOverAPI_Object
 			{
 				$parts[] = ucfirst(substr($field, $last, $i));
 				$i++;
-				$last = $i;				
+				$last = $i;
 			}
 		}
 
@@ -101,12 +112,17 @@ class ChargeOverAPI_Object
 		return $prefix . implode('', $parts);
 	}
 
+	/**
+	 * @param $name
+	 * @param $args
+	 *
+	 * @return bool|null
+	 */
 	public function __call($name, $args)
 	{
 		if (substr($name, 0, 3) == 'set')
 		{
 			$field = ChargeOverAPI_Object::transformMethodToField($name);
-			//$this->_arr[$field] = current($args);
 			$this->$field = current($args);
 			return true;
 		}
@@ -116,7 +132,7 @@ class ChargeOverAPI_Object
 
 			//print('transformed [' . $name . ' to ' . $field . ']' . "\n");
 
-			if (array_key_exists(0, $args) and 			// Trying to get a specific element, e.g.   getLineItems(2) 
+			if (array_key_exists(0, $args) and 			// Trying to get a specific element, e.g.   getLineItems(2)
 				is_numeric($args[0]))
 			{
 				//if (!empty($this->_arr[$field][$args[0]]))
@@ -154,6 +170,11 @@ class ChargeOverAPI_Object
 		}
 	}
 
+	/**
+	 * @param $val
+	 *
+	 * @return array
+	 */
 	protected function _massage($val)
 	{
 		if (is_object($val))
@@ -167,24 +188,33 @@ class ChargeOverAPI_Object
 				$val[$key] = $this->_massage($value);
 			}
 		}
-	
+
 		return $val;
 	}
 
+	/**
+	 * @return string
+	 */
 	protected function toJSON()
 	{
 		$vars = get_object_vars($this);
 		$arr = $this->_massage($vars);
-		
+
 		return json_encode($arr, JSON_PRETTY_PRINT);
 	}
 
+	/**
+	 * @return array
+	 */
 	public function toArray()
 	{
 		$vars = get_object_vars($this);
 		return $this->_massage($vars);
 	}
 
+	/**
+	 * @return string
+	 */
 	public function __toString()
 	{
 		return $this->toJSON();
